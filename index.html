@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Library</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            overflow-x: hidden;
+            animation: backgroundAnimation 5s infinite alternate;
+        }
+
+        @keyframes backgroundAnimation {
+            from {
+                background: linear-gradient(135deg, #1e3c72, #2a5298);
+            }
+            to {
+                background: linear-gradient(135deg, #2a5298, #1e3c72);
+            }
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            letter-spacing: 1px;
+            animation: slideIn 1.2s ease;
+            position: relative;
+            color: #fff;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: #4caf50;
+            animation: growBar 1.5s ease;
+        }
+
+        @keyframes growBar {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100px;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 1s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        table th, table td {
+            border: none;
+            padding: 15px;
+            text-align: left;
+            color: #fff;
+            animation: fadeInUp 1.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        table th {
+            background-color: rgba(0, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        table tr:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        a {
+            color: #4caf50;
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #4caf50;
+            left: 0;
+            bottom: -2px;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s;
+        }
+
+        a:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4caf50;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .highlight {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+            border-radius: 10px;
+            animation: popIn 1.5s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>3D Model Library</h1>
+        <div class="highlight">
+            <p>Explore a curated collection of 3D models for your projects. Click on a model name to view details.</p>
+        </div>
+        <div class="spinner" id="spinner"></div>
+        <table id="modelTable">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Semester</th>
+                    <th>Subject</th>
+                    <th>Chapter</th>
+                    <th>Model Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic Content -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const SHEET_ID = '1pxF0qNBBeE09bmIUK82yhdTENssp6RdbftCoaEXoGa4'; // Replace with your Google Sheet ID
+        const API_KEY = 'AIzaSyD2BcACa3alkrb99gSNK0N4ePqOVy6yMS8'; // Replace with your API key
+
+        async function fetchSheetData() {
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = 'block';
+
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1?key=${API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.values;
+            } catch (error) {
+                console.error('Error fetching data from Google Sheets:', error);
+                return [];
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function populateTable(data) {
+            const tableBody = document.querySelector('#modelTable tbody');
+            tableBody.innerHTML = '';
+
+            data.slice(1).forEach(row => {
+                const [department, semester, subject, chapter, modelName, modelLink] = row;
+                const rowElement = document.createElement('tr');
+                rowElement.innerHTML = `
+                    <td>${department}</td>
+                    <td>${semester}</td>
+                    <td>${subject}</td>
+                    <td>${chapter}</td>
+                    <td><a href="viewer.html?model=${encodeURIComponent(modelLink)}" target="_blank">${modelName}</a></td>
+                `;
+                tableBody.appendChild(rowElement);
+            });
+        }
+
+        async function init() {
+            try {
+                const sheetData = await fetchSheetData();
+                populateTable(sheetData);
+            } catch (error) {
+                console.error('Error fetching data from Google Sheets:', error);
+            }
+        }
+
+        init();
+
+// Define the expected state value for CSRF protection
+const expectedState = "secureRandomString123";
+
+
+
+    </script>
+</body>
+</html>
