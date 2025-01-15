@@ -125,7 +125,7 @@
         const loadModel = () => {
             return new Promise((resolve, reject) => {
                 const loader = new GLTFLoader();
-                const modelUrl = 'path/to/your/model.glb'; // Replace with your model URL
+                const modelUrl = 'https://raw.githubusercontent.com/alik005/3d/main/AR.glb'; // Replace with your model URL
                 loader.load(
                     modelUrl,
                     (gltf) => resolve(gltf.scene),
