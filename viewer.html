@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js AR Viewer</title>
+    <title>AR Model Viewer</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         body {
             margin: 0;
             overflow: hidden;
+            background-color: black;
         }
 
-        canvas {
-            display: block;
+        model-viewer {
+            width: 100vw;
+            height: 100vh;
         }
 
         .controls {
@@ -39,110 +42,54 @@
     </style>
 </head>
 <body>
+    <model-viewer
+        id="ar-viewer"
+        src=""
+        alt="3D Model"
+        ar
+        ar-modes="scene-viewer quick-look webxr"
+        camera-controls
+        auto-rotate
+        environment-image="neutral"
+        shadow-intensity="1"
+        seamless-poster
+    ></model-viewer>
+
     <div class="controls">
-        <button class="button" id="start-ar">Start AR</button>
-        <button class="button" id="place-model" style="display: none;">Place Model</button>
+        <button class="button" id="ar-button">View in AR</button>
+        <button class="button" id="back-button">Back</button>
     </div>
 
-    <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
-        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/webxr/ARButton.js';
-        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelLink = urlParams.get('model');
+        const viewer = document.getElementById('ar-viewer');
+        const arButton = document.getElementById('ar-button');
+        const backButton = document.getElementById('back-button');
 
-        let scene, camera, renderer, controller;
-        let reticle, model, isModelPlaced = false;
+        // Load model dynamically
+        if (modelLink) {
+            viewer.src = decodeURIComponent(modelLink);
 
-        const init = () => {
-            // Create Three.js Scene
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            document.body.appendChild(renderer.domElement);
-
-            // Add AR Button
-            document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
-
-            // Add Light
-            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-            scene.add(light);
-
-            // Load Reticle (Placement Indicator)
-            const geometry = new THREE.RingGeometry(0.1, 0.15, 32).rotateX(-Math.PI / 2);
-            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            reticle = new THREE.Mesh(geometry, material);
-            reticle.visible = false;
-            scene.add(reticle);
-
-            // Handle AR Hit Test
-            const session = renderer.xr.getSession();
-            session.addEventListener('select', onSelect);
-            controller = renderer.xr.getController(0);
-            scene.add(controller);
-
-            const hitTestSource = session.requestReferenceSpace('viewer')
-                .then((refSpace) => session.requestHitTestSource({ space: refSpace }))
-                .then((source) => {
-                    renderer.setAnimationLoop(() => {
-                        renderer.render(scene, camera);
-                        if (reticle.visible) {
-                            controller.addEventListener('selectstart', () => {
-                                if (!isModelPlaced) {
-                                    placeModel(reticle.matrix);
-                                }
-                            });
-                        }
-                    });
-
-                    renderer.xr.addEventListener('sessionend', () => {
-                        source.cancel();
-                    });
-                });
-
-            // Handle Window Resize
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        };
-
-        const placeModel = (matrix) => {
-            if (!model) {
-                loadModel().then((loadedModel) => {
-                    model = loadedModel;
-                    scene.add(model);
-                    model.position.setFromMatrixPosition(matrix);
-                    model.quaternion.setFromRotationMatrix(matrix);
-                    isModelPlaced = true;
-                    reticle.visible = false;
-                });
+            // Add iOS USDZ fallback if the model is .glb
+            if (modelLink.endsWith('.glb')) {
+                const usdzLink = modelLink.replace('.glb', '.usdz');
+                viewer.setAttribute('ios-src', usdzLink);
             }
-        };
+        } else {
+            alert('No model URL provided. Returning to library.');
+            window.history.back();
+        }
 
-        const loadModel = () => {
-            return new Promise((resolve, reject) => {
-                const loader = new GLTFLoader();
-                const modelUrl = 'https://raw.githubusercontent.com/alik005/3d/main/AR.glb'; // Replace with your model URL
-                loader.load(
-                    modelUrl,
-                    (gltf) => resolve(gltf.scene),
-                    undefined,
-                    (error) => reject(error)
-                );
-            });
-        };
+        // Handle AR button click
+        arButton.addEventListener('click', () => {
+            viewer.activateAR();
+        });
 
-        const onSelect = () => {
-            if (!isModelPlaced && reticle.visible) {
-                placeModel(reticle.matrix);
-            }
-        };
-
-        // Initialize AR Scene
-        init();
+        // Handle back button click
+        backButton.addEventListener('click', () => {
+            window.history.back();
+        });
     </script>
 </body>
 </html>
