@@ -57,6 +57,7 @@
         placement="floor"
         ar-placement="object"
         ar-debug
+        scale="1 1 1" <!-- Fix the model size -->
     ></model-viewer>
 
     <div class="controls">
@@ -65,12 +66,12 @@
     </div>
 
     <script>
-        // Get model link from query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const modelLink = urlParams.get('model');
         const viewer = document.getElementById('ar-viewer');
         const arButton = document.getElementById('ar-button');
         const backButton = document.getElementById('back-button');
+        let isPlaced = false; // Track if the model has been placed
 
         // Load model dynamically
         if (modelLink) {
@@ -86,6 +87,17 @@
             window.history.back();
         }
 
+        // Prevent re-positioning and re-scaling
+        viewer.addEventListener('ar-placement', (event) => {
+            if (!isPlaced) {
+                isPlaced = true;
+                console.log('Model placed on surface');
+            } else {
+                console.warn('Model already placed. Preventing further changes.');
+                event.preventDefault();
+            }
+        });
+
         // Handle AR button click
         arButton.addEventListener('click', () => {
             viewer.activateAR();
@@ -96,19 +108,19 @@
             window.history.back();
         });
 
-        // Listen for AR status
+        // AR status monitoring
         viewer.addEventListener('ar-status', (event) => {
             if (event.detail.status === 'failed') {
                 alert('AR tracking failed. Please ensure proper lighting and a flat surface.');
             }
         });
 
-        // Listen for AR tracking updates
+        // Prevent automatic resizing or position adjustment
         viewer.addEventListener('ar-tracking', (event) => {
             if (event.detail.status === 'not-tracking') {
-                console.warn('Model is not tracking the surface.');
+                console.warn('Tracking lost. The model might appear unstable.');
             } else if (event.detail.status === 'tracking') {
-                console.log('Model is properly anchored to the surface.');
+                console.log('Model tracking stabilized.');
             }
         });
     </script>
