@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Model Viewer</title>
+    <title>AR Tabletop Model Viewer</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         body {
@@ -54,10 +54,11 @@
         shadow-intensity="1"
         seamless-poster
         disable-tap
-        placement="floor"
+        placement="object"
         ar-placement="object"
+        ar-scale="fixed"
+        scale="1 1 1"
         ar-debug
-        scale="1 1 1" <!-- Fix the model size -->
     ></model-viewer>
 
     <div class="controls">
@@ -87,14 +88,22 @@
             window.history.back();
         }
 
-        // Prevent re-positioning and re-scaling
-        viewer.addEventListener('ar-placement', (event) => {
+        // Adjust placement height (tabletop alignment)
+        viewer.addEventListener('ar-placement', () => {
             if (!isPlaced) {
                 isPlaced = true;
-                console.log('Model placed on surface');
-            } else {
-                console.warn('Model already placed. Preventing further changes.');
-                event.preventDefault();
+
+                // Adjust the model to be on a tabletop (e.g., height offset)
+                viewer.updateFrustumCulling = true;
+                viewer.scene.position.y += 0.5; // Raise model by 0.5 meters for tabletop placement
+                console.log('Model placed on a tabletop surface.');
+            }
+        });
+
+        // Prevent repositioning and scaling
+        viewer.addEventListener('ar-placement', (event) => {
+            if (isPlaced) {
+                event.preventDefault(); // Prevent additional placement changes
             }
         });
 
@@ -108,19 +117,19 @@
             window.history.back();
         });
 
-        // AR status monitoring
+        // Monitor AR tracking status
         viewer.addEventListener('ar-status', (event) => {
             if (event.detail.status === 'failed') {
-                alert('AR tracking failed. Please ensure proper lighting and a flat surface.');
+                alert('AR tracking failed. Ensure good lighting and a flat tabletop surface.');
             }
         });
 
-        // Prevent automatic resizing or position adjustment
+        // Debug tracking events
         viewer.addEventListener('ar-tracking', (event) => {
             if (event.detail.status === 'not-tracking') {
-                console.warn('Tracking lost. The model might appear unstable.');
+                console.warn('Tracking lost. Ensure the table is flat and visible.');
             } else if (event.detail.status === 'tracking') {
-                console.log('Model tracking stabilized.');
+                console.log('Model is properly tracking on the table.');
             }
         });
     </script>
