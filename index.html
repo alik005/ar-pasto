@@ -209,19 +209,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>3D Model Library</h1>
+        <h1>Pasto Menu</h1>
         <div class="highlight">
-            <p>Explore a curated collection of 3D models for your projects. Click on a model name to view details.</p>
+            <p>Order and Keep Smiling</p>
         </div>
         <div class="spinner" id="spinner"></div>
         <table id="modelTable">
             <thead>
                 <tr>
-                    <th>Department</th>
-                    <th>Semester</th>
-                    <th>Subject</th>
-                    <th>Chapter</th>
-                    <th>Model Name</th>
+                    <th>Dish</th>
+                    <th>Price</th>
+                    <th>AR View</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -231,7 +230,7 @@
     </div>
 
     <script>
-        const SHEET_ID = '1pxF0qNBBeE09bmIUK82yhdTENssp6RdbftCoaEXoGa4'; // Replace with your Google Sheet ID
+        const SHEET_ID = '17TgRjnTIo3O3wUn6UUrN9EaaztYyj9jjWE8-bM5kkNU'; // Replace with your Google Sheet ID
         const API_KEY = 'AIzaSyD2BcACa3alkrb99gSNK0N4ePqOVy6yMS8'; // Replace with your API key
 
         async function fetchSheetData() {
@@ -261,8 +260,6 @@
                 rowElement.innerHTML = `
                     <td>${department}</td>
                     <td>${semester}</td>
-                    <td>${subject}</td>
-                    <td>${chapter}</td>
                     <td><a href="viewer.html?model=${encodeURIComponent(modelLink)}" target="_blank">${modelName}</a></td>
                 `;
                 tableBody.appendChild(rowElement);
